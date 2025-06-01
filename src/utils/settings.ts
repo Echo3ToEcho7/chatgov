@@ -77,3 +77,15 @@ export const fetchOllamaModels = async (baseUrl: string): Promise<string[]> => {
     throw error;
   }
 };
+
+export const isLLMConfigured = (settings: AISettings): boolean => {
+  if (settings.provider === 'ollama') {
+    // For Ollama, assume it's configured if using default values (user likely has Ollama running)
+    // Only consider unconfigured if values are empty
+    return !!(settings.ollamaConfig.baseUrl && settings.ollamaConfig.model);
+  } else {
+    // For API providers, check if the API key is set
+    const apiKey = settings.apiKeys[settings.provider as keyof typeof settings.apiKeys];
+    return !!(apiKey && apiKey.trim().length > 0);
+  }
+};

@@ -9,7 +9,7 @@ import { Navbar } from './components/Navbar';
 import { AIService } from './services/aiService';
 import type { Bill } from './types';
 import type { AISettings } from './types/settings';
-import { loadSettings } from './utils/settings';
+import { loadSettings, isLLMConfigured } from './utils/settings';
 
 async function loadFlyonUI() {
   return import('flyonui/flyonui');
@@ -49,6 +49,16 @@ function App() {
   }, []);
 
   const handleBillSelect = (bill: Bill) => {
+    const settings = loadSettings();
+    
+    // Check if LLM is configured
+    if (!isLLMConfigured(settings)) {
+      // Show settings dialog instead of navigating to chat
+      setSelectedBill(bill);
+      setShowSettings(true);
+      return;
+    }
+    
     setPreviousState(currentState);
     setSelectedBill(bill);
     setCurrentState('chat');
@@ -61,6 +71,16 @@ function App() {
 
   const handleSettingsChange = (newSettings: AISettings) => {
     setAiService(new AIService(newSettings));
+  };
+
+  const handleSettingsClose = () => {
+    setShowSettings(false);
+    
+    // If a bill was selected and LLM is now configured, navigate to chat
+    if (selectedBill && isLLMConfigured(loadSettings())) {
+      setPreviousState(currentState);
+      setCurrentState('chat');
+    }
   };
 
   const handleNavStateChange = (newState: 'search' | 'browse') => {
@@ -106,7 +126,7 @@ function App() {
       {/* Settings Panel */}
       <SettingsPanel
         isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
+        onClose={handleSettingsClose}
         onSettingsChange={handleSettingsChange}
       />
     </div>
