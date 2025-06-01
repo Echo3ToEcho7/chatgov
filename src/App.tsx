@@ -6,6 +6,7 @@ import { ChatInterface } from './components/ChatInterface';
 import { SettingsPanel } from './components/SettingsPanel';
 import { BrowseBills } from './components/BrowseBills';
 import { Navbar } from './components/Navbar';
+import { LLMConfigAlert } from './components/LLMConfigAlert';
 import { AIService } from './services/aiService';
 import type { Bill } from './types';
 import type { AISettings } from './types/settings';
@@ -22,6 +23,7 @@ function App() {
   const [previousState, setPreviousState] = useState<AppState>('search');
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showLLMAlert, setShowLLMAlert] = useState(false);
   const [aiService, setAiService] = useState<AIService>(new AIService(loadSettings()));
 
   useEffect(() => {
@@ -53,9 +55,9 @@ function App() {
     
     // Check if LLM is configured
     if (!isLLMConfigured(settings)) {
-      // Show settings dialog instead of navigating to chat
+      // Show alert instead of navigating to chat
       setSelectedBill(bill);
-      setShowSettings(true);
+      setShowLLMAlert(true);
       return;
     }
     
@@ -76,11 +78,22 @@ function App() {
   const handleSettingsClose = () => {
     setShowSettings(false);
     
-    // If a bill was selected and LLM is now configured, navigate to chat
+    // If a bill was selected from alert and LLM is now configured, navigate to chat
     if (selectedBill && isLLMConfigured(loadSettings())) {
       setPreviousState(currentState);
       setCurrentState('chat');
+      setShowLLMAlert(false); // Hide alert as we're now configured
     }
+  };
+
+  const handleAlertDismiss = () => {
+    setShowLLMAlert(false);
+    setSelectedBill(null); // Clear selected bill when dismissing alert
+  };
+
+  const handleAlertOpenSettings = () => {
+    setShowLLMAlert(false);
+    setShowSettings(true);
   };
 
   const handleNavStateChange = (newState: 'search' | 'browse') => {
@@ -122,6 +135,13 @@ function App() {
           />
         )}
       </div>
+
+      {/* LLM Configuration Alert */}
+      <LLMConfigAlert
+        isVisible={showLLMAlert}
+        onDismiss={handleAlertDismiss}
+        onOpenSettings={handleAlertOpenSettings}
+      />
 
       {/* Settings Panel */}
       <SettingsPanel
