@@ -281,14 +281,29 @@ ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
                   {completeBill.sponsors.length === 1 ? 'Sponsor:' : 'Sponsors:'}
                 </span>
                 <div className="flex flex-wrap gap-1">
-                  {completeBill.sponsors.slice(0, 2).map((sponsor, index) => (
-                    <div
-                      key={index}
-                      className="badge badge-outline badge-sm"
-                    >
-                      {sponsor.firstName} {sponsor.lastName} ({sponsor.party}-{sponsor.state}{sponsor.district ? `-${sponsor.district}` : ''})
-                    </div>
-                  ))}
+                  {completeBill.sponsors.slice(0, 2).map((sponsor, index) => {
+                    const getPartyBadgeClass = (party: string) => {
+                      switch (party.toUpperCase()) {
+                        case 'R':
+                          return 'bg-red-600 text-white border-red-600';
+                        case 'D':
+                          return 'bg-blue-600 text-white border-blue-600';
+                        default:
+                          return 'badge-outline';
+                      }
+                    };
+
+                    return (
+                      <div key={index} className="flex items-center gap-1">
+                        <span className="text-sm">
+                          {sponsor.firstName} {sponsor.lastName}
+                        </span>
+                        <span className={`badge badge-sm ${getPartyBadgeClass(sponsor.party)}`}>
+                          {sponsor.party}-{sponsor.state}{sponsor.district ? `-${sponsor.district}` : ''}
+                        </span>
+                      </div>
+                    );
+                  })}
                   {completeBill.sponsors.length > 2 && (
                     <span className="text-xs text-base-content/60">
                       +{completeBill.sponsors.length - 2} more
