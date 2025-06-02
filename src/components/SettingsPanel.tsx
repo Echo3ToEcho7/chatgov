@@ -78,10 +78,27 @@ export const SettingsPanel = ({ isOpen, onClose, onSettingsChange }: SettingsPan
       }, 100);
     }
 
+    // Clean up backdrop when modal closes
+    if (!isOpen) {
+      // Remove any leftover backdrops
+      const backdrops = document.querySelectorAll('.settings-modal-backdrop, [data-overlay-backdrop]');
+      backdrops.forEach(backdrop => backdrop.remove());
+      
+      // Re-enable body scroll
+      document.body.style.overflow = '';
+      document.body.classList.remove('overflow-hidden');
+    }
+
     // Listen for modal close events to update React state
     const modalElement = document.getElementById('settings-modal');
     if (modalElement) {
       const handleModalClose = () => {
+        // Clean up backdrop and body scroll
+        const backdrops = document.querySelectorAll('.settings-modal-backdrop, [data-overlay-backdrop]');
+        backdrops.forEach(backdrop => backdrop.remove());
+        document.body.style.overflow = '';
+        document.body.classList.remove('overflow-hidden');
+        
         // Update React state when FlyonUI closes the modal
         onClose();
       };
@@ -97,7 +114,7 @@ export const SettingsPanel = ({ isOpen, onClose, onSettingsChange }: SettingsPan
         modalElement.removeEventListener('transitionend', handleModalClose);
       };
     }
-  }, [onClose]);
+  }, [onClose, isOpen]);
 
   const handleProviderChange = (providerId: string) => {
     const newSettings = { ...settings, provider: providerId as any };
@@ -140,6 +157,23 @@ export const SettingsPanel = ({ isOpen, onClose, onSettingsChange }: SettingsPan
   const handleSave = () => {
     saveSettings(settings);
     onSettingsChange(settings);
+    
+    // Clean up backdrop immediately
+    const backdrops = document.querySelectorAll('.settings-modal-backdrop, [data-overlay-backdrop]');
+    backdrops.forEach(backdrop => backdrop.remove());
+    document.body.style.overflow = '';
+    document.body.classList.remove('overflow-hidden');
+    
+    onClose();
+  };
+
+  const handleClose = () => {
+    // Clean up backdrop immediately
+    const backdrops = document.querySelectorAll('.settings-modal-backdrop, [data-overlay-backdrop]');
+    backdrops.forEach(backdrop => backdrop.remove());
+    document.body.style.overflow = '';
+    document.body.classList.remove('overflow-hidden');
+    
     onClose();
   };
 
@@ -246,7 +280,7 @@ export const SettingsPanel = ({ isOpen, onClose, onSettingsChange }: SettingsPan
             <h3 className="modal-title">AI Settings</h3>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="btn btn-text btn-circle btn-sm"
               aria-label="Close"
               data-overlay="#settings-modal"
@@ -598,7 +632,7 @@ export const SettingsPanel = ({ isOpen, onClose, onSettingsChange }: SettingsPan
           <div className="modal-footer">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="btn btn-secondary"
               data-overlay="#settings-modal"
             >
