@@ -15,6 +15,63 @@ export const BillSearch = ({ onBillSelect }: BillSearchProps) => {
 
   const congressApi = new CongressApiService();
 
+  // Function to detect and parse bill ID patterns
+  const detectBillId = (searchQuery: string) => {
+    const trimmed = searchQuery.trim().toUpperCase();
+    
+    // Patterns to match: "HR 123", "HR123", "S 456", "S456", etc.
+    const billIdPattern = /^(HR|H\.R\.|S|S\.)\s*(\d+)$/i;
+    const match = trimmed.match(billIdPattern);
+    
+    if (match) {
+      let billType = match[1].replace(/\./g, '').toUpperCase(); // Remove dots, uppercase
+      const billNumber = match[2];
+      
+      // Normalize bill type
+      if (billType === 'HR' || billType === 'H R') {
+        billType = 'HR';
+      } else if (billType === 'S') {
+        billType = 'S';
+      }
+      
+      return { type: billType, number: billNumber };
+    }
+    
+    return null;
+  };
+
+  // Function to load a specific bill by ID
+  const loadBillById = async (billType: string, billNumber: string) => {
+    setLoading(true);
+    setSearched(true);
+    
+    try {
+      // Default to current Congress (119th) for bill lookup
+      const congress = 119;
+      console.log(`Loading specific bill: ${congress}-${billType}-${billNumber}`);
+      
+      const bill = await congressApi.getBillDetails(congress, billType.toLowerCase(), billNumber);
+      
+      if (bill) {
+        // Directly select the bill for chat
+        onBillSelect(bill);
+        return;
+      } else {
+        // If not found in current congress, search normally
+        console.log('Bill not found in current congress, falling back to search');
+        const results = await congressApi.searchBills(`${billType} ${billNumber}`);
+        setBills(results);
+      }
+    } catch (error) {
+      console.error('Failed to load specific bill:', error);
+      // Fall back to normal search
+      const results = await congressApi.searchBills(`${billType} ${billNumber}`);
+      setBills(results);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const loadRecentBills = async () => {
       try {
@@ -31,16 +88,25 @@ export const BillSearch = ({ onBillSelect }: BillSearchProps) => {
   const handleSearch = async () => {
     if (!query.trim()) return;
     
-    setLoading(true);
-    setSearched(true);
-    try {
-      const results = await congressApi.searchBills(query);
-      setBills(results);
-    } catch (error) {
-      console.error('Search failed:', error);
-      setBills([]);
-    } finally {
-      setLoading(false);
+    // Check if the query matches a bill ID pattern
+    const billId = detectBillId(query);
+    
+    if (billId) {
+      // Direct bill loading
+      await loadBillById(billId.type, billId.number);
+    } else {
+      // Normal search
+      setLoading(true);
+      setSearched(true);
+      try {
+        const results = await congressApi.searchBills(query);
+        setBills(results);
+      } catch (error) {
+        console.error('Search failed:', error);
+        setBills([]);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -108,7 +174,7 @@ export const BillSearch = ({ onBillSelect }: BillSearchProps) => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Search for bills by keyword, title, or topic..."
+            placeholder="Search by keyword, title, topic, or bill ID (e.g., HR 123, S 456)..."
             className="input input-bordered flex-1"
           />
           <button 
