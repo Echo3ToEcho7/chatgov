@@ -49,7 +49,8 @@ const getMockBills = (query: string) => {
         firstName: 'John',
         lastName: 'Doe',
         party: 'D',
-        state: 'CA'
+        state: 'CA',
+        district: 12
       }],
       summary: {
         text: 'A bill to invest in American infrastructure and create jobs.'
@@ -96,7 +97,8 @@ const getMockRecentBills = () => {
         firstName: 'Mike',
         lastName: 'Rogers',
         party: 'R',
-        state: 'AL'
+        state: 'AL',
+        district: 3
       }],
       summary: {
         text: 'A bill to authorize appropriations for fiscal year 2025 for military activities of the Department of Defense.'

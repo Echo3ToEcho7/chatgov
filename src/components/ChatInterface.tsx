@@ -163,10 +163,15 @@ export const ChatInterface = ({ bill, onBack, aiService }: ChatInterfaceProps) =
   }, [bill]);
 
   const generateBillContext = (bill: Bill): string => {
+    const formatSponsor = (sponsor: any) => {
+      const district = sponsor.district ? `-${sponsor.district}` : '';
+      return `${sponsor.firstName} ${sponsor.lastName} (${sponsor.party}-${sponsor.state}${district})`;
+    };
+
     return `Bill: ${bill.type} ${bill.number} - ${bill.title}
 Introduced: ${new Date(bill.introducedDate).toLocaleDateString()}
 Congress: ${bill.congress}
-${bill.sponsors ? `Sponsor: ${bill.sponsors[0].firstName} ${bill.sponsors[0].lastName} (${bill.sponsors[0].party}-${bill.sponsors[0].state})` : ''}
+${bill.sponsors ? `Sponsor: ${formatSponsor(bill.sponsors[0])}` : ''}
 ${bill.latestAction ? `Latest Action: ${bill.latestAction.text} (${new Date(bill.latestAction.actionDate).toLocaleDateString()})` : ''}
 ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
   };
@@ -242,9 +247,51 @@ ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
           <h2 className="card-title">
             {bill.type} {bill.number}
           </h2>
-          <p className="text-base-content/70 text-sm leading-relaxed">
+          <p className="text-base-content/70 text-sm leading-relaxed mb-3">
             {bill.title}
           </p>
+          
+          {/* Sponsor Information */}
+          {bill.sponsors && bill.sponsors.length > 0 && (
+            <div className="mb-3">
+              <div className="text-sm font-medium text-base-content/90 mb-2">
+                {bill.sponsors.length === 1 ? 'Sponsor:' : 'Sponsors:'}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {bill.sponsors.map((sponsor, index) => (
+                  <div
+                    key={index}
+                    className="badge badge-outline badge-lg flex items-center gap-2"
+                  >
+                    <span className="font-medium">
+                      {sponsor.firstName} {sponsor.lastName}
+                    </span>
+                    <span className="text-xs">
+                      ({sponsor.party}-{sponsor.state}{sponsor.district ? `-${sponsor.district}` : ''})
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {bill.sponsors.length > 3 && (
+                <div className="text-xs text-base-content/60 mt-1">
+                  and {bill.sponsors.length - 3} other{bill.sponsors.length - 3 > 1 ? 's' : ''}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Bill Metadata */}
+          <div className="flex flex-wrap gap-3 text-xs text-base-content/60 mb-3">
+            <span>Congress {bill.congress}</span>
+            <span>•</span>
+            <span>Introduced {new Date(bill.introducedDate).toLocaleDateString()}</span>
+            {bill.latestAction && (
+              <>
+                <span>•</span>
+                <span>Latest: {new Date(bill.latestAction.actionDate).toLocaleDateString()}</span>
+              </>
+            )}
+          </div>
           {isLoadingBill && (
             <div className="flex items-center gap-2 mt-2 text-warning text-sm">
               <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">

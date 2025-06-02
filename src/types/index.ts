@@ -13,6 +13,7 @@ export interface Bill {
     lastName: string;
     party: string;
     state: string;
+    district?: number;
   }>;
   summary?: {
     text: string;
@@ -43,6 +44,7 @@ export interface CongressApiResponse {
       lastName: string;
       party: string;
       state: string;
+      district?: number;
     }>;
     summary?: {
       text: string;
