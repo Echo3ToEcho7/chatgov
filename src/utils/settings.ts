@@ -16,6 +16,7 @@ const DEFAULT_SETTINGS: AISettings = {
   embeddingProvider: 'openai',
   ollamaEmbeddingModel: 'nomic-embed-text',
   congressNumber: 119,
+  useEmbeddingRelevance: true,
 };
 
 export const loadSettings = (): AISettings => {

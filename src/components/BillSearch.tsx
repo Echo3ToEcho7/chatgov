@@ -1,6 +1,7 @@
 import { useState, useEffect, type KeyboardEvent } from 'react';
 import type { Bill } from '../types';
 import { CongressApiService } from '../services/congressApi';
+import { formatDate } from '../utils/dateUtils';
 
 interface BillSearchProps {
   onBillSelect: (bill: Bill) => void;
@@ -133,7 +134,7 @@ export const BillSearch = ({ onBillSelect }: BillSearchProps) => {
             Congress {bill.congress}
           </span>
           <span className="badge badge-success">
-            Introduced: {new Date(bill.introducedDate).toLocaleDateString()}
+            Introduced: {formatDate(bill.introducedDate)}
           </span>
         </div>
         {bill.sponsors && bill.sponsors.length > 0 && (
@@ -148,7 +149,7 @@ export const BillSearch = ({ onBillSelect }: BillSearchProps) => {
           <div className="mb-4 text-sm text-base-content/70">
             <strong>Latest Action:</strong> {bill.latestAction.text}
             <span className="block text-xs text-base-content/50 mt-1">
-              {new Date(bill.latestAction.actionDate).toLocaleDateString()}
+              {formatDate(bill.latestAction.actionDate)}
             </span>
           </div>
         )}

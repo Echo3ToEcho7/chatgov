@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Bill } from '../types';
 import { CongressApiService } from '../services/congressApi';
 import { loadSettings } from '../utils/settings';
+import { formatDate } from '../utils/dateUtils';
 
 interface PassedLegislationProps {
   onBillSelect: (bill: Bill) => void;
@@ -70,7 +71,7 @@ export const PassedLegislation = ({ onBillSelect }: PassedLegislationProps) => {
             Congress {bill.congress}
           </span>
           <span className="badge badge-primary">
-            Signed: {new Date(bill.latestAction!.actionDate).toLocaleDateString()}
+            Signed: {formatDate(bill.latestAction!.actionDate)}
           </span>
         </div>
         {bill.sponsors && bill.sponsors.length > 0 && (
@@ -85,7 +86,7 @@ export const PassedLegislation = ({ onBillSelect }: PassedLegislationProps) => {
           <div className="mb-4 text-sm text-base-content/70">
             <strong>Status:</strong> {bill.latestAction.text}
             <span className="block text-xs text-base-content/50 mt-1">
-              {new Date(bill.latestAction.actionDate).toLocaleDateString()}
+              {formatDate(bill.latestAction.actionDate)}
             </span>
           </div>
         )}

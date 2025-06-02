@@ -6,6 +6,7 @@ import { BillTextService } from '../services/billTextService';
 import { EmbeddingService } from '../services/embeddingService';
 import { CongressApiService } from '../services/congressApi';
 import type { BillContent } from '../types/bill';
+import { formatDate } from '../utils/dateUtils';
 
 // Configure marked for safe HTML rendering
 marked.setOptions({
@@ -198,10 +199,10 @@ export const ChatInterface = ({ bill, onBack, aiService }: ChatInterfaceProps) =
     };
 
     return `Bill: ${bill.type} ${bill.number} - ${bill.title}
-Introduced: ${new Date(bill.introducedDate).toLocaleDateString()}
+Introduced: ${formatDate(bill.introducedDate)}
 Congress: ${bill.congress}
 ${bill.sponsors ? `Sponsor: ${formatSponsor(bill.sponsors[0])}` : ''}
-${bill.latestAction ? `Latest Action: ${bill.latestAction.text} (${new Date(bill.latestAction.actionDate).toLocaleDateString()})` : ''}
+${bill.latestAction ? `Latest Action: ${bill.latestAction.text} (${formatDate(bill.latestAction.actionDate)})` : ''}
 ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
   };
 
@@ -221,14 +222,26 @@ ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
 
     try {
       const billContext = generateBillContext(completeBill);
+      const settings = aiService.getSettings();
       let relevantChunks;
       
-      // If we have bill content with embeddings, search for relevant sections
+      // Check if we should use embedding relevance or entire bill content
       if (billContent && billContent.embeddings.length > 0) {
-        try {
-          relevantChunks = await embeddingService.searchSimilarChunks(inputMessage, billContent, 3);
-        } catch (error) {
-          console.warn('Failed to search bill content, proceeding without content search:', error);
+        if (settings.useEmbeddingRelevance) {
+          // Use relevant sections based on user question
+          try {
+            relevantChunks = await embeddingService.searchSimilarChunks(inputMessage, billContent, 3);
+            console.log('Using relevant bill sections based on embedding similarity');
+          } catch (error) {
+            console.warn('Failed to search bill content, proceeding without content search:', error);
+          }
+        } else {
+          // Use entire bill content
+          relevantChunks = billContent.chunks.map(chunk => ({
+            chunk: chunk,
+            similarity: 1.0
+          }));
+          console.log('Using entire bill content for AI analysis');
         }
       }
       
@@ -317,11 +330,11 @@ ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
             <div className="flex items-center gap-2 text-xs text-base-content/60">
               <span>Congress {bill.congress}</span>
               <span>•</span>
-              <span>Introduced {new Date(bill.introducedDate).toLocaleDateString()}</span>
+              <span>Introduced {formatDate(bill.introducedDate)}</span>
               {bill.latestAction && (
                 <>
                   <span>•</span>
-                  <span>Latest: {new Date(bill.latestAction.actionDate).toLocaleDateString()}</span>
+                  <span>Latest: {formatDate(bill.latestAction.actionDate)}</span>
                 </>
               )}
             </div>

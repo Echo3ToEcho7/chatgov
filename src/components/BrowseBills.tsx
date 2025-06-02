@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { CongressApiService } from '../services/congressApi';
 import { PassedLegislation } from './PassedLegislation';
 import type { Bill } from '../types';
+import { formatDate } from '../utils/dateUtils';
 
 interface BrowseBillsProps {
   onBillSelect: (bill: Bill) => void;
@@ -89,13 +90,6 @@ export const BrowseBills = ({ onBillSelect }: BrowseBillsProps) => {
     setCurrentPage(1); // Reset to first page when filtering
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
 
   const getPaginationPages = () => {
     const pages = [];

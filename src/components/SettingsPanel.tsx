@@ -447,14 +447,14 @@ export const SettingsPanel = ({ isOpen, onClose, onSettingsChange }: SettingsPan
               {/* Ollama Embedding Model Selection */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-300">
+                  <label className="block text-sm font-medium text-base-content/70">
                     Embedding Model
                   </label>
                   <button
                     type="button"
                     onClick={refreshOllamaEmbeddingModels}
                     disabled={isLoadingEmbeddingModels}
-                    className="flex items-center gap-2 px-3 py-1 text-sm bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white rounded transition-colors"
+                    className="btn btn-primary btn-sm"
                     title="Refresh available embedding models from Ollama"
                   >
                     <svg 
@@ -474,7 +474,7 @@ export const SettingsPanel = ({ isOpen, onClose, onSettingsChange }: SettingsPan
                   </button>
                 </div>
                 {embeddingModelsError && (
-                  <div className="mb-2 p-2 bg-yellow-900/50 border border-yellow-700 rounded text-yellow-300 text-sm">
+                  <div className="alert alert-warning mb-2">
                     {embeddingModelsError}
                   </div>
                 )}
@@ -486,18 +486,18 @@ export const SettingsPanel = ({ isOpen, onClose, onSettingsChange }: SettingsPan
                       ollamaEmbeddingModel: e.target.value
                     }));
                   }}
-                  className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="select select-bordered w-full"
                 >
                   {ollamaEmbeddingModels.map(model => (
                     <option key={model} value={model}>{model}</option>
                   ))}
                 </select>
                 {ollamaEmbeddingModels.length > 0 && !embeddingModelsError && (
-                  <p className="mt-1 text-xs text-gray-400">
+                  <p className="mt-1 text-xs text-base-content/60">
                     {ollamaEmbeddingModels.length} embedding model{ollamaEmbeddingModels.length !== 1 ? 's' : ''} available
                   </p>
                 )}
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-base-content/50">
                   Recommended: nomic-embed-text, all-minilm, or mxbai-embed-large
                 </p>
               </div>
@@ -532,6 +532,36 @@ export const SettingsPanel = ({ isOpen, onClose, onSettingsChange }: SettingsPan
               <div className="label">
                 <span className="label-text-alt">Current: {settings.congressNumber}th Congress</span>
                 <span className="label-text-alt">Default: 119th Congress (2025-2027)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Content Settings */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">AI Content Settings</h3>
+            <p className="text-sm text-base-content/60 mb-4">
+              Configure how bill content is sent to the AI for analysis.
+            </p>
+            
+            <div className="form-control">
+              <label className="label cursor-pointer">
+                <span className="label-text">
+                  Use Embedding Relevance
+                </span>
+                <input
+                  type="checkbox"
+                  checked={settings.useEmbeddingRelevance}
+                  onChange={(e) => setSettings({...settings, useEmbeddingRelevance: e.target.checked})}
+                  className="checkbox checkbox-primary"
+                />
+              </label>
+              <div className="label">
+                <span className="label-text-alt">
+                  {settings.useEmbeddingRelevance 
+                    ? 'AI receives only relevant bill sections based on your question' 
+                    : 'AI receives the entire bill content for analysis'
+                  }
+                </span>
               </div>
             </div>
           </div>

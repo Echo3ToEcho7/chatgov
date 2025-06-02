@@ -14,6 +14,7 @@ export interface AISettings {
   embeddingProvider: 'openai' | 'ollama';
   ollamaEmbeddingModel: string;
   congressNumber: number;
+  useEmbeddingRelevance: boolean;
 }
 
 export interface ProviderConfig {

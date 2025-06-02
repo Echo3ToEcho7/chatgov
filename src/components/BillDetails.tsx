@@ -1,4 +1,5 @@
 import type { Bill } from '../types';
+import { formatDate } from '../utils/dateUtils';
 
 interface BillDetailsProps {
   bill: Bill;
@@ -40,7 +41,7 @@ export const BillDetails = ({ bill, onBack }: BillDetailsProps) => {
                 Introduction
               </h3>
               <p>
-                <strong>Introduced:</strong> {new Date(bill.introducedDate).toLocaleDateString()}
+                <strong>Introduced:</strong> {formatDate(bill.introducedDate)}
               </p>
             </div>
           </div>
@@ -73,7 +74,7 @@ export const BillDetails = ({ bill, onBack }: BillDetailsProps) => {
                 <h3 className="card-title">Latest Action</h3>
                 <div>
                   <p className="mb-2">
-                    <strong>Date:</strong> {new Date(bill.latestAction.actionDate).toLocaleDateString()}
+                    <strong>Date:</strong> {formatDate(bill.latestAction.actionDate)}
                   </p>
                   <p>
                     <strong>Action:</strong> {bill.latestAction.text}
