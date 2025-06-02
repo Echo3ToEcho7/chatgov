@@ -263,63 +263,63 @@ ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
   return (
     <div className="card h-[90vh] flex flex-col bg-base-200">
       <div className="card-header">
-        <button 
-          onClick={onBack} 
-          className="btn btn-neutral mb-4"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back
-        </button>
-        <div>
-          <h2 className="card-title">
-            {bill.type} {bill.number}
-          </h2>
-          <p className="text-base-content/70 text-sm leading-relaxed mb-3">
-            {bill.title}
-          </p>
+        <div className="flex items-start gap-4">
+          <button 
+            onClick={onBack} 
+            className="btn btn-neutral flex-shrink-0"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+        <div className="flex-1 min-w-0">
+          {/* Top Row: Title and Bill Number */}
+          <div className="flex items-start justify-between mb-2">
+            <h2 className="card-title flex-1 min-w-0">
+              <span className="badge badge-primary mr-2">{bill.type} {bill.number}</span>
+              <span className="truncate">{bill.title}</span>
+            </h2>
+          </div>
           
-          {/* Sponsor Information */}
-          {completeBill.sponsors && completeBill.sponsors.length > 0 && (
-            <div className="mb-3">
-              <div className="text-sm font-medium text-base-content/90 mb-2">
-                {completeBill.sponsors.length === 1 ? 'Sponsor:' : 'Sponsors:'}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {completeBill.sponsors.map((sponsor, index) => (
-                  <div
-                    key={index}
-                    className="badge badge-outline badge-lg flex items-center gap-2"
-                  >
-                    <span className="font-medium">
-                      {sponsor.firstName} {sponsor.lastName}
+          {/* Bottom Row: Sponsors and Metadata */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+            {/* Sponsor Information */}
+            {completeBill.sponsors && completeBill.sponsors.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-base-content/70 font-medium">
+                  {completeBill.sponsors.length === 1 ? 'Sponsor:' : 'Sponsors:'}
+                </span>
+                <div className="flex flex-wrap gap-1">
+                  {completeBill.sponsors.slice(0, 2).map((sponsor, index) => (
+                    <div
+                      key={index}
+                      className="badge badge-outline badge-sm"
+                    >
+                      {sponsor.firstName} {sponsor.lastName} ({sponsor.party}-{sponsor.state}{sponsor.district ? `-${sponsor.district}` : ''})
+                    </div>
+                  ))}
+                  {completeBill.sponsors.length > 2 && (
+                    <span className="text-xs text-base-content/60">
+                      +{completeBill.sponsors.length - 2} more
                     </span>
-                    <span className="text-xs">
-                      ({sponsor.party}-{sponsor.state}{sponsor.district ? `-${sponsor.district}` : ''})
-                    </span>
-                  </div>
-                ))}
-              </div>
-              {completeBill.sponsors.length > 3 && (
-                <div className="text-xs text-base-content/60 mt-1">
-                  and {completeBill.sponsors.length - 3} other{completeBill.sponsors.length - 3 > 1 ? 's' : ''}
+                  )}
                 </div>
+              </div>
+            )}
+
+            {/* Bill Metadata */}
+            <div className="flex items-center gap-2 text-xs text-base-content/60">
+              <span>Congress {bill.congress}</span>
+              <span>•</span>
+              <span>Introduced {new Date(bill.introducedDate).toLocaleDateString()}</span>
+              {bill.latestAction && (
+                <>
+                  <span>•</span>
+                  <span>Latest: {new Date(bill.latestAction.actionDate).toLocaleDateString()}</span>
+                </>
               )}
             </div>
-          )}
-
-          {/* Bill Metadata */}
-          <div className="flex flex-wrap gap-3 text-xs text-base-content/60 mb-3">
-            <span>Congress {bill.congress}</span>
-            <span>•</span>
-            <span>Introduced {new Date(bill.introducedDate).toLocaleDateString()}</span>
-            {bill.latestAction && (
-              <>
-                <span>•</span>
-                <span>Latest: {new Date(bill.latestAction.actionDate).toLocaleDateString()}</span>
-              </>
-            )}
           </div>
           {isLoadingBill && (
             <div className="flex items-center gap-2 mt-2 text-warning text-sm">
@@ -339,6 +339,7 @@ ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
               <span>✓ Full bill text loaded ({billContent.chunks.length} sections)</span>
             </div>
           )}
+        </div>
         </div>
       </div>
 
