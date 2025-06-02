@@ -262,18 +262,8 @@ ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
 
   return (
     <div className="card h-[90vh] flex flex-col bg-base-200">
-      <div className="card-header">
-        <div className="flex items-start gap-4">
-          <button 
-            onClick={onBack} 
-            className="btn btn-neutral flex-shrink-0"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back
-          </button>
-        <div className="flex-1 min-w-0">
+      <div className="card-header relative">
+        <div className="flex-1 min-w-0 pr-12">
           {/* Top Row: Title and Bill Number */}
           <div className="flex items-start justify-between mb-2">
             <h2 className="card-title flex-1 min-w-0">
@@ -340,7 +330,17 @@ ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
             </div>
           )}
         </div>
-        </div>
+        
+        {/* Close Button - Top Right */}
+        <button 
+          onClick={onBack} 
+          className="btn btn-circle btn-sm btn-ghost absolute top-4 right-4"
+          aria-label="Close"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       <div className="card-body flex-1 overflow-y-auto space-y-4 bg-base-200">
