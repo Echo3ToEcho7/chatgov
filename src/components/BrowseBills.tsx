@@ -11,7 +11,7 @@ type BillType = 'all' | 'hr' | 's';
 type ViewMode = 'recent' | 'passed';
 
 export const BrowseBills = ({ onBillSelect }: BrowseBillsProps) => {
-  const [bills, setBills] = useState<Bill[]>([]);
+  const [allBills, setAllBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,32 +24,16 @@ export const BrowseBills = ({ onBillSelect }: BrowseBillsProps) => {
 
   useEffect(() => {
     loadBills();
-  }, [currentPage, billType]);
+  }, []); // Load bills once on mount
 
   const loadBills = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // For now, we'll use the search endpoint with a broad query
-      // In a real implementation, you'd want a dedicated browse endpoint
-      let query = '';
-      switch (billType) {
-        case 'hr':
-          query = 'type:hr';
-          break;
-        case 's':
-          query = 'type:s';
-          break;
-        default:
-          query = '*';
-      }
-      
-      const fetchedBills = await congressApi.searchBills(query, billsPerPage);
-      setBills(fetchedBills);
-      
-      // Estimate total pages (in real implementation, this would come from API)
-      setTotalPages(Math.ceil(1000 / billsPerPage)); // Assume ~1000 bills total
+      // Load recent bills without filtering - we'll filter client-side
+      const fetchedBills = await congressApi.getRecentBills(100); // Get more bills for filtering
+      setAllBills(fetchedBills);
     } catch (err) {
       setError('Failed to load bills. Please try again.');
       console.error('Error loading bills:', err);
@@ -57,6 +41,43 @@ export const BrowseBills = ({ onBillSelect }: BrowseBillsProps) => {
       setLoading(false);
     }
   };
+
+  // Filter bills based on selected type
+  const getFilteredBills = () => {
+    if (billType === 'all') {
+      return allBills;
+    }
+    
+    return allBills.filter(bill => {
+      const type = bill.type.toLowerCase();
+      if (billType === 'hr') {
+        return type === 'hr' || type === 'hjres' || type === 'hres' || type === 'hconres';
+      } else if (billType === 's') {
+        return type === 's' || type === 'sjres' || type === 'sres' || type === 'sconres';
+      }
+      return true;
+    });
+  };
+
+  // Get bills for current page
+  const getPaginatedBills = () => {
+    const filteredBills = getFilteredBills();
+    const startIndex = (currentPage - 1) * billsPerPage;
+    const endIndex = startIndex + billsPerPage;
+    return filteredBills.slice(startIndex, endIndex);
+  };
+
+  // Update pagination when filter changes
+  useEffect(() => {
+    const filteredBills = getFilteredBills();
+    const newTotalPages = Math.ceil(filteredBills.length / billsPerPage);
+    setTotalPages(newTotalPages);
+    
+    // Reset to page 1 if current page is beyond new total
+    if (currentPage > newTotalPages && newTotalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [billType, allBills]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -193,7 +214,7 @@ export const BrowseBills = ({ onBillSelect }: BrowseBillsProps) => {
           {!loading && !error && (
             <>
               <div className="space-y-4">
-                {bills.map((bill) => (
+                {getPaginatedBills().map((bill) => (
                   <div
                     key={`${bill.congress}-${bill.type}-${bill.number}`}
                     className="card card-border cursor-pointer hover:shadow-lg transition-shadow"
@@ -303,7 +324,7 @@ export const BrowseBills = ({ onBillSelect }: BrowseBillsProps) => {
 
               {/* Results Info */}
               <div className="mt-4 text-center text-base-content/60 text-sm">
-                Page {currentPage} of {totalPages} • {bills.length} bills shown
+                Page {currentPage} of {totalPages} • {getPaginatedBills().length} bills shown • {getFilteredBills().length} total filtered
               </div>
             </>
           )}
