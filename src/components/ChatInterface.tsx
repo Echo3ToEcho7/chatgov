@@ -4,6 +4,7 @@ import type { Bill, ChatMessage } from '../types';
 import type { AIService } from '../services/aiService';
 import { BillTextService } from '../services/billTextService';
 import { EmbeddingService } from '../services/embeddingService';
+import { CongressApiService } from '../services/congressApi';
 import type { BillContent } from '../types/bill';
 
 // Configure marked for safe HTML rendering
@@ -25,6 +26,7 @@ export const ChatInterface = ({ bill, onBack, aiService }: ChatInterfaceProps) =
   const [billContent, setBillContent] = useState<BillContent | null>(null);
   const [isLoadingBill, setIsLoadingBill] = useState(true);
   const [billError, setBillError] = useState<string | null>(null);
+  const [completeBill, setCompleteBill] = useState<Bill>(bill);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastAiMessageRef = useRef<HTMLDivElement>(null);
   
@@ -32,6 +34,7 @@ export const ChatInterface = ({ bill, onBack, aiService }: ChatInterfaceProps) =
   const [embeddingCache] = useState(new Map<string, BillContent>());
   
   const billTextService = new BillTextService();
+  const congressApi = new CongressApiService();
   
   // Create embedding service that reacts to aiService changes
   const [embeddingService, setEmbeddingService] = useState(() => new EmbeddingService(aiService.getSettings()));
@@ -106,6 +109,32 @@ export const ChatInterface = ({ bill, onBack, aiService }: ChatInterfaceProps) =
       }
     }
   }, [messages]);
+
+  // Fetch complete bill details if sponsors are missing
+  useEffect(() => {
+    const fetchCompleteBillDetails = async () => {
+      // If bill already has sponsors, no need to fetch
+      if (bill.sponsors && bill.sponsors.length > 0) {
+        setCompleteBill(bill);
+        return;
+      }
+
+      try {
+        console.log('Fetching complete bill details for sponsor information...');
+        const completeBillData = await congressApi.getBillDetails(bill.congress, bill.type.toLowerCase(), bill.number);
+        if (completeBillData) {
+          setCompleteBill(completeBillData);
+        } else {
+          setCompleteBill(bill);
+        }
+      } catch (error) {
+        console.error('Failed to fetch complete bill details:', error);
+        setCompleteBill(bill);
+      }
+    };
+
+    fetchCompleteBillDetails();
+  }, [bill]);
 
   useEffect(() => {
     const loadBillContent = async () => {
@@ -191,7 +220,7 @@ ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
     setIsLoading(true);
 
     try {
-      const billContext = generateBillContext(bill);
+      const billContext = generateBillContext(completeBill);
       let relevantChunks;
       
       // If we have bill content with embeddings, search for relevant sections
@@ -252,13 +281,13 @@ ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
           </p>
           
           {/* Sponsor Information */}
-          {bill.sponsors && bill.sponsors.length > 0 && (
+          {completeBill.sponsors && completeBill.sponsors.length > 0 && (
             <div className="mb-3">
               <div className="text-sm font-medium text-base-content/90 mb-2">
-                {bill.sponsors.length === 1 ? 'Sponsor:' : 'Sponsors:'}
+                {completeBill.sponsors.length === 1 ? 'Sponsor:' : 'Sponsors:'}
               </div>
               <div className="flex flex-wrap gap-2">
-                {bill.sponsors.map((sponsor, index) => (
+                {completeBill.sponsors.map((sponsor, index) => (
                   <div
                     key={index}
                     className="badge badge-outline badge-lg flex items-center gap-2"
@@ -272,9 +301,9 @@ ${bill.summary ? `Summary: ${bill.summary.text}` : ''}`;
                   </div>
                 ))}
               </div>
-              {bill.sponsors.length > 3 && (
+              {completeBill.sponsors.length > 3 && (
                 <div className="text-xs text-base-content/60 mt-1">
-                  and {bill.sponsors.length - 3} other{bill.sponsors.length - 3 > 1 ? 's' : ''}
+                  and {completeBill.sponsors.length - 3} other{completeBill.sponsors.length - 3 > 1 ? 's' : ''}
                 </div>
               )}
             </div>
