@@ -17,6 +17,20 @@ A comprehensive webapp for searching US Congressional bills with AI-powered chat
 - 🎨 **Modern UI**: Built with FlyonUI v2.2.0 component library
 - 📱 **Responsive Design**: Optimized for desktop, tablet, and mobile
 
+## Screenshots
+
+### Main Search Interface
+![Landing Page](screenshots/landing.jpeg)
+*The main landing page featuring recent bills from Congress, search functionality, and clean navigation. Users can browse the latest legislative activity or search for specific bills by keyword.*
+
+### Browse Passed Legislation
+![Browse Bills](screenshots/browse_bills.jpeg)
+*Browse enacted laws and passed legislation with server-side pagination. Filter by Congress number and view comprehensive bill details including sponsors, dates, and status.*
+
+### AI-Powered Bill Analysis
+![Chat Interface](screenshots/chat.jpeg)
+*Chat with AI about specific bills using multiple providers (OpenAI, Anthropic, xAI, Ollama). Ask questions about bill content, implications, and legislative process with intelligent responses.*
+
 ## Quick Start
 
 ### Development
