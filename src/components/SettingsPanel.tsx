@@ -235,7 +235,7 @@ export const SettingsPanel = ({ isOpen, onClose, onSettingsChange }: SettingsPan
   return (
     <div 
       id="settings-modal"
-      className="overlay modal overlay-open:opacity-100 overlay-open:duration-300 hidden"
+      className={`overlay modal overlay-open:opacity-100 overlay-open:duration-300 ${isOpen ? '' : 'hidden'}`}
       role="dialog" 
       tabIndex={-1}
       data-overlay-options='{"bodyScroll":false}'
